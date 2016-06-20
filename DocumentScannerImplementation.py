@@ -5,15 +5,16 @@ import datetime
 
 
 class Scanner(object):
-    """The documentation of this class follows PEP-257 Docstring conventions
-    This class is demonstrated the basic capabilities of the twain's python extension.
-    It is important to have the twain.pyd as well as the pytwain module imported before testing
-    the implementation of this class. The only other non standard library is the PythonMagick used
-    for conversion and compression of scanned images. The PythonMagick module is not compiled from source
-    but is retrieved from the website serving the unofficial python binaries for various libraries in python
-    The whl file was extracted using PIP.
     """
-
+    The documentation of this class follows PEP 257 Docstring conventions.
+    This is a wrapper class implementing the Twain which is a API for
+    accessing Scanner and Camera on a windows machine. The purpose of this
+    class is to provide an easy access to the code present within the twain.pyd
+    file that can be downloaded from https://pypi.python.org/pypi/twain the aforementioned
+    file is a DLL file. The twain file supports 32-bit Windows and does not support Linux or
+    OSx.
+    """
+    # Global static variables
     get_source_object = None
     open_source = None
     recently_created_directory = None
@@ -23,17 +24,27 @@ class Scanner(object):
 
     @staticmethod
     def get_sources():
-        """This method returns the Source Object"""
+        """
+        The purpose of this method is to retrieve the the source object
+        :return: Source object
+        """
         Scanner.get_source_object = twain.SourceManager(0)
         return Scanner.get_source_object
 
     @staticmethod
     def open_sources(obj):
-        """This method displays the list of connected scanners in some cases it displays one device as two different
-        devices this is primarily because it is capable of using the vendor provided drivers along with generic twain
-         drivers to communicate with the hardware. Once the user selects his preferred device the method calls the
-         native interface providing options for selecting the page dimensions, setting DPI, and option to select
-         Flatbed or Feeder mode"""
+        """
+        The source object returned by the get_sources method is passed as a parameter
+        to the open_sources method. This method when called displays the list of connected
+        scanners in some cases it displays two devices even though only one device is connected
+        to the computer the aforementioned is because twain has its own set of drivers that can
+        talk to the scanner/camera hardware. Once the user selects a source (preferred device)
+        the program then calls the native scanner interface that provides options related to
+        page size and feeder or flat bed selection. This class is designed keeping the process of
+        automation during the usage of a feeder in mind.
+        :param obj: Source Object
+        :return: -
+        """
         if type(Scanner.get_source_object) == type(obj):
             try:
                 Scanner.open_source = obj.OpenSource()
@@ -48,10 +59,15 @@ class Scanner(object):
 
     @staticmethod
     def start_scan(destination_directory):
-        """This method gets the document from he scanner when it completes scanning it also creates a directory in the
-        root folder of the code where it stores them later it moves the images to a desired location on the disk
-        based on the argument passed to this method. Shutil is used instead of native os file transfers as shutil overcomes
-        the problem related to moving files to different disks"""
+        """
+        This method is called once the source and the preferred scan settings are selected. This method
+        retrieves the scanned document from the printer in the form of a .bmp. Initially it stores the files
+        in the code directory later it moves them to a timestamped directory at the destination directory.
+        The bitmaps obtained are typically very
+        large in size.
+        :param destination_directory:
+        :return: -
+        """
         new_directory = os.path.join(destination_directory, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         Scanner.recently_created_directory = new_directory
         os.mkdir(new_directory)
