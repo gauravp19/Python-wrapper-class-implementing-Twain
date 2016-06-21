@@ -1,4 +1,4 @@
-# Python-wrapper-class-implementing-Twain (Updated to have allow custome DPI)
+# Python-wrapper-class-implementing-Twain (Updated to have allow custom DPI)
 
 ## Sample code demonstrating the usage of the Document Scanner
 
