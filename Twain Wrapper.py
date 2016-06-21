@@ -18,6 +18,7 @@ class Scanner(object):
     get_source_object = None
     open_source = None
     recently_created_directory = None
+    dpi = 600
 
     def __init__(self):
         pass
@@ -47,9 +48,13 @@ class Scanner(object):
         """
         if type(Scanner.get_source_object) == type(obj):
             try:
-                Scanner.open_source = obj.OpenSource()
+                sourceList = obj.GetSourceList()
+                Scanner.open_source = obj.OpenSource(sourceList[0])
                 if Scanner.open_source is not None:
-                    Scanner.open_source.RequestAcquire(1, 1)
+                    Scanner.open_source.SetCapability(twain.ICAP_XRESOLUTION, twain.TWTY_FIX32, float(Scanner.dpi))
+                    Scanner.open_source.SetCapability(twain.ICAP_YRESOLUTION, twain.TWTY_FIX32, float(Scanner.dpi))
+                    Scanner.open_source.SetCapability(twain.CAP_FEEDERENABLED,twain.TWTY_FIX32, float(Scanner.dpi))
+                    Scanner.open_source.RequestAcquire(0, 0)
                 else:
                     print "No source selected"
             except twain.excTWCC_SUCCESS:
