@@ -17,6 +17,7 @@ class Scanner(object):
     # Global static variables
     get_source_object = None
     open_source = None
+    source_list = None
     recently_created_directory = None
     dpi = 600
 
@@ -33,7 +34,18 @@ class Scanner(object):
         return Scanner.get_source_object
 
     @staticmethod
-    def open_sources(obj):
+    def get_source_list(source_object):
+        """
+        This method returns the source list
+        :return: List of sources
+        """
+        if type(Scanner.get_source_object) == type(source_object):
+            return source_object.GetSourceList()
+        else:
+            print "Invalid object type passed."
+
+    @staticmethod
+    def open_sources(source_object, source_name):
         """
         The source object returned by the get_sources method is passed as a parameter
         to the open_sources method. This method when called displays the list of connected
@@ -43,17 +55,19 @@ class Scanner(object):
         the program then calls the native scanner interface that provides options related to
         page size and feeder or flat bed selection. This class is designed keeping the process of
         automation during the usage of a feeder in mind.
-        :param obj: Source Object
-        :return: -
+        :param source_object
+        :param source_name
+        :return:
         """
-        if type(Scanner.get_source_object) == type(obj):
+        if type(Scanner.get_source_object) == type(source_object):
             try:
-                sourceList = obj.GetSourceList()
-                Scanner.open_source = obj.OpenSource(sourceList[0])
+                #source_list = source_object.GetSourceList()
+                Scanner.open_source = source_object.OpenSource(source_name)
                 if Scanner.open_source is not None:
                     Scanner.open_source.SetCapability(twain.ICAP_XRESOLUTION, twain.TWTY_FIX32, float(Scanner.dpi))
                     Scanner.open_source.SetCapability(twain.ICAP_YRESOLUTION, twain.TWTY_FIX32, float(Scanner.dpi))
-                    Scanner.open_source.SetCapability(twain.CAP_FEEDERENABLED,twain.TWTY_FIX32, float(Scanner.dpi))
+                    Scanner.open_source.SetCapability(twain.CAP_FEEDERENABLED, twain.TWTY_FIX32, float(Scanner.dpi))
+                    Scanner.open_source.SetCapability(twain.ICAP_PIXELTYPE, twain.TWTY_UINT16, twain.TWPT_BW)
                     Scanner.open_source.RequestAcquire(0, 0)
                 else:
                     print "No source selected"
@@ -91,13 +105,14 @@ class Scanner(object):
                         name, ext = os.path.splitext(x)
                         if ext.lower() == ".bmp":
                             shutil.move(os.path.join(os.getcwd(), x), os.path.join(new_directory, x))
+
         except twain.excDSTransferCancelled:
             print "There is/are no paper/papers in the feeder!"
         except twain.excTWCC_SEQERROR:
+            Scanner.open_source.destroy()
+            Scanner.get_source_object.destroy()
+            Scanner.get_source_object = None
+            Scanner.open_source = None
             print "All the documents have been successfully scanned"
         except twain.excTWCC_BUMMER:
             print "Paper Jammed!"
-
-
-
-
